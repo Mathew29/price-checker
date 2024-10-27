@@ -2,11 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  @apply bg-white dark:bg-gray-950;
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
+@layer base {
+  :root {
+    --color-bkg: 210deg 40% 98%;
+    --color-content: 217deg 32.6% 17.5%;
+    --color-accent1: 288deg 95.8% 90.6%;
+    --color-accent2: 168deg 83.8% 78.2%;
   }
 }
+@media (prefers-color-scheme:dark) {
+  /* color-scheme: dark; */
+  :root {
+  --color-bkg: 217deg 32.6% 17.5%;
+  --color-content: 210deg 40% 98%;
+  --color-accent1: 288deg 95.8% 60.6%;
+  --color-accent2: 168deg 83.8% 48.2%;
+  }
+}
+/* html,
+body {
+   @apply bg-white dark:bg-gray-950;
+
+} */
