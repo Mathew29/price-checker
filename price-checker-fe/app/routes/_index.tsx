@@ -8,13 +8,6 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function action({ request}: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const username = formData.get("username")
-  const password = formData.get("password")
-  console.log({ username, password })
-  return redirect(`/homePage`)
-}
 
 export default function Index() {
   return (
@@ -30,8 +23,8 @@ export default function Index() {
             Sign In
           </p>
           <Form method="post">
-              <input name="username" type="text" />
-              <input name="password" type="password" />
+              <input className="text-sky-700 decoration-accent-1" name="username" type="text" />
+              <input className="text-sky-700" name="password" type="password" />
               <button type="submit">Submit</button>
           </Form>
 
@@ -40,4 +33,15 @@ export default function Index() {
     </div>
   );
 }
+
+export async function action({ request }: ActionFunctionArgs) {
+
+  const formData = await request.formData();
+  const username = formData.get("username")
+  const password = formData.get("password")
+  console.log({username, password});
+
+  return redirect(`/homePage`)
+}
+
 
