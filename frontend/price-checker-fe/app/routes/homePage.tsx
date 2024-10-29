@@ -18,7 +18,7 @@ export default function HomePage() {
                 <p className="leading-6 text-gray-700 dark:text-gray-200">
                     Press Track to start tracking!
                 </p>
-                <input name="product" type="text" />
+                <input className="text-sky-700" name="product" type="text" />
                 <button><Link to="/priceTrackingPage">Track</Link></button>
                 </div>
 
