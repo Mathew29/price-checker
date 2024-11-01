@@ -4,8 +4,7 @@ const pool = require('../config/db');
 
 
 const registerUser = async (req, res) => {
-    const { username, password_hash } = req.body;
-    console.log('Received:', username, password_hash);
+    const { username, password_hash, email } = req.body;
 
     try {
         const existingUser = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
@@ -15,8 +14,8 @@ const registerUser = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password_hash, 10);
         const result = await pool.query(
-            'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING *',
-            [username, hashedPassword]
+            'INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3) RETURNING *',
+            [username, hashedPassword, email]
         );
 
         res.status(201).json({ id: result.rows[0].id });
