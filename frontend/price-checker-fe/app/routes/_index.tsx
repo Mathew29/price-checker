@@ -1,5 +1,6 @@
 import type { MetaFunction, ActionFunctionArgs } from "@remix-run/node";
 import { Form, Link, redirect } from "@remix-run/react";
+import SignInPage from "./SignInPage";
 
 export const meta: MetaFunction = () => {
   return [
@@ -18,15 +19,13 @@ export default function Index() {
             My Price Tracking App
           </h1>
         </header>
-        <nav className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700">
-          <p className="leading-6 decoration-accent-1">
-            Sign In
-          </p>
-          <Form method="post">
+        <nav>
+          <SignInPage />
+          {/* <Form method="post">
               <input className="text-sky-700 decoration-accent-1" name="username" type="text" />
               <input className="text-sky-700" name="password" type="password" />
               <button type="submit">Submit</button>
-          </Form>
+          </Form> */}
 
         </nav>
       </div>
@@ -34,14 +33,6 @@ export default function Index() {
   );
 }
 
-export async function action({ request }: ActionFunctionArgs) {
 
-  const formData = await request.formData();
-  const username = formData.get("username")
-  const password = formData.get("password")
-  console.log({username, password});
-
-  return redirect(`/homePage`)
-}
 
 
