@@ -4,7 +4,8 @@ const pool = require('../config/db');
 
 
 const registerUser = async (req, res) => {
-    const { password_hash, email } = req.body;
+    const { password, email } = req.body;
+    console.log(password, email);
 
     try {
         const existingUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
@@ -12,7 +13,7 @@ const registerUser = async (req, res) => {
             return res.status(409).json({ message: 'Email already exists' });
         }
 
-        const hashedPassword = await bcrypt.hash(password_hash, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
             'INSERT INTO users (password_hash, email) VALUES ($1, $2) RETURNING *',
             [hashedPassword, email]
@@ -28,12 +29,13 @@ const registerUser = async (req, res) => {
 
 
 const loginUser = async (req, res) => {
-    const { email, password_hash } = req.body;
+    const { email, password } = req.body;
+    console.log(email, password)
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
     if (result.rows.length > 0) {
         const user = result.rows[0];
-        const isMatch = await bcrypt.compare(password_hash, user.password_hash);
+        const isMatch = await bcrypt.compare(password, user.password_hash);
 
         if (isMatch) {
             const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
@@ -44,4 +46,15 @@ const loginUser = async (req, res) => {
     res.status(401).json({ message: 'Invalid credentials' });
 };
 
-module.exports = { registerUser, loginUser };
+const logoutUser = (req,res) => {
+    try{
+        res.cookie("authToken", '', {maxAge: 0,httpOnly: true, path: '/'});
+        return res.status(200).json({message: 'User Logged Out'})
+
+    } catch(error){
+        console.error("Error logging out", error);
+        res.status(500).json({message: 'Server error'})
+    }
+}
+
+module.exports = { registerUser, loginUser, logoutUser };

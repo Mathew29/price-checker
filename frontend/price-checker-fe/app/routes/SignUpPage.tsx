@@ -1,5 +1,36 @@
 import { Form,redirect, useActionData } from "@remix-run/react"
 import { ActionFunctionArgs, json } from "@remix-run/node";
+import axios from "axios";
+
+export async function action({ request }: ActionFunctionArgs) {
+
+    const formData = await request.formData();
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+    const confirmPassword = formData.get("confirmPassword") as string
+    if (!email || !email.includes('@')){
+        return json({ error: 'Please enter a valid email address' }, { status: 400 });
+    }
+    if (confirmPassword != password){
+        return json({error: "Passwords do not match"}, { status: 400})
+    }
+
+
+    try {
+        const response = await axios.post('http://localhost:5001/api/users/register', {
+            password,
+            email
+        })
+        return redirect(`/`)
+    } catch(error){
+        if(error.response){
+            return json({error: error.response.data.error}, {status: error.response.status})
+        }
+        return json({error: 'Server error fe'}, {status: 500})
+    }
+
+
+  }
 
 export default function SignUpPage() {
     const actionData = useActionData()
@@ -85,17 +116,3 @@ export default function SignUpPage() {
 }
 
 
-export async function action({ request }: ActionFunctionArgs) {
-
-    const formData = await request.formData();
-    const email = formData.get("email") as string
-    const password = formData.get("password") as string
-    const confirmPassword = formData.get("confirmPassword") as string
-    if (!email || !email.includes('@')){
-        return json({ error: 'Please enter a valid email address' }, { status: 400 });
-    }
-    if (confirmPassword != password){
-        return json({error: "Passwords do not match"}, { status: 400})
-    }
-    return redirect(`/`)
-  }
