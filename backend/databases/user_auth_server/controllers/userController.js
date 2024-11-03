@@ -5,8 +5,6 @@ const pool = require('../config/db');
 
 const registerUser = async (req, res) => {
     const { password, email } = req.body;
-    console.log(password, email);
-
     try {
         const existingUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         if (existingUser.rows.length > 0) {
@@ -30,7 +28,6 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
-    console.log(email, password)
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
     if (result.rows.length > 0) {
@@ -48,7 +45,7 @@ const loginUser = async (req, res) => {
 
 const logoutUser = (req,res) => {
     try{
-        res.cookie("authToken", '', {maxAge: 0,httpOnly: true, path: '/'});
+        // res.cookie("authToken", '', {maxAge: 0,httpOnly: true, path: '/'});
         return res.status(200).json({message: 'User Logged Out'})
 
     } catch(error){
