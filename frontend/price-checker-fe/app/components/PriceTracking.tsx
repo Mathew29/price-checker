@@ -1,11 +1,13 @@
-// frontend/src/routes/price-tracking-page.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from "@remix-run/react";
 import axios from 'axios';
+import Modal from './Modal';
 
 export default function PriceTracking() {
     const [trackingData, setTrackingData] = useState([]);
     const [error, setError] = useState(null);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [currentProductId, setCurrentProductId] = useState(null);
     const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
 
 
@@ -15,21 +17,16 @@ export default function PriceTracking() {
                 const productIdsResponse = await axios.get(`http://localhost:5001/api/users/item-tracking/${userId}`);
                 const productIds = productIdsResponse.data.map(item => item.item_id);
 
-
                 if (productIds.length === 0) {
                     setError('No tracked items found for this user.');
                     return;
                 }
-
 
                 const productDetailsResponses = await Promise.all(
                     productIds.map(productId =>
                         axios.get(`http://localhost:3000/api/product/product-details/${productId}`)
                     )
                 );
-
-
-
 
                 const combinedData = productDetailsResponses.map(response => response.data);
                 setTrackingData(combinedData);
@@ -52,18 +49,17 @@ export default function PriceTracking() {
         });
     };
 
-    const handleDelete = async (productId) => {
+    const handleDelete = async () => {
         try {
-            await axios.delete(`http://localhost:5001/api/users/item-tracking/${userId}/${productId}`);
-            setTrackingData((prevData) => {
-                return prevData.filter(product => product.id !== productId);
-            });
+            await axios.delete(`http://localhost:5001/api/users/item-tracking/${userId}/${currentProductId}`);
+            setTrackingData((prevData) => prevData.filter(product => product.id !== currentProductId));
+            setModalOpen(false);
+            setCurrentProductId(null);
         } catch (error) {
             console.error('Failed to delete the product:', error);
             setError('Failed to delete the product.');
         }
     };
-
 
     return (
         <div className="max-w-5xl mx-auto p-6">
@@ -106,7 +102,10 @@ export default function PriceTracking() {
                                 </td>
                                 <td className="border-b border-gray-700 p-4">
                                     <button
-                                        onClick={() => handleDelete(product.id)}
+                                        onClick={() => {
+                                            setCurrentProductId(product.id);
+                                            setModalOpen(true);
+                                        }}
                                         className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-500"
                                     >
                                         Delete
@@ -121,6 +120,11 @@ export default function PriceTracking() {
                     )}
                 </tbody>
             </table>
+            <Modal
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onConfirm={handleDelete}
+            />
         </div>
     );
 }

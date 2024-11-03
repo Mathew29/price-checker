@@ -75,6 +75,12 @@ const Login = () => {
                     Create an Account
                   </Link>
                 </p>
+                <p className="mt-5 text-center text-sm/6 text-gray-500">
+                  Monitor the price of products you want to buy!
+                </p>
+                <p className="mt-2 text-center text-sm/6 text-gray-500">
+                  Create a list and get tracking!
+                </p>
               </div>
             </div>
           </div>

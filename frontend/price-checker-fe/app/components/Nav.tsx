@@ -5,7 +5,8 @@ const Nav = () => {
     return(
         <>
             <div className="flex items-center space-x-4">
-                <NavLink to="/priceTracking">Tracking</NavLink>
+                <NavLink to="/addItem">Add Item</NavLink>
+                <NavLink to="/dashboard">Tracking</NavLink>
                 <LogoutButton />
             </div>
         </>

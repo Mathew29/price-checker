@@ -69,7 +69,7 @@ export default function AddItemPage() {
                             name="userId"
                             value={userId || ''}
                         />
-                        <button type="submit" className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600 transition duration-200">
+                        <button type="submit" className=" bg-blue-500 text-white rounded w-full px-4 py-2 hover:bg-blue-600 transition duration-200">
                             Track
                         </button>
                     </Form>
