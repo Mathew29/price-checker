@@ -20,9 +20,6 @@ export async function action({ request }: ActionFunctionArgs) {
         const response = await axios.post('http://localhost:3000/api/product/add-product', { product });
 
         const { productId } = response.data
-        console.log(response.data);
-        console.log(userId);
-
 
         await axios.post('http://localhost:5001/api/users/track-user-item', {
             userId,

@@ -87,4 +87,43 @@ const trackUserItem = async (request, response) => {
     }
 };
 
-module.exports = { registerUser, loginUser, logoutUser, trackUserItem };
+const getUserTrackedItems = async (req, res) => {
+    const { userId } = req.params;
+    console.log("UserId: ", userId);
+
+    try {
+        const result = await pool.query('SELECT * FROM user_item_tracking WHERE user_id = $1', [userId]);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching user item tracking data:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+const deleteUserTrackedItem = async (req, res) => {
+
+    const { userId, productId } = req.params;
+
+    try {
+        const trackingResult = await pool.query(
+            'SELECT * FROM user_item_tracking WHERE user_id = $1 AND item_id = $2',
+            [userId, productId]
+        );
+
+        if (trackingResult.rowCount === 0) {
+            return res.status(404).json({ message: 'Tracked item not found.' });
+        }
+
+        await pool.query(
+            'DELETE FROM user_item_tracking WHERE user_id = $1 AND item_id = $2',
+            [userId, productId]
+        );
+
+        res.status(200).json({ message: 'Tracked item removed successfully.' });
+    } catch (error) {
+        console.error('Error removing tracked item:', error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+}
+
+module.exports = { registerUser, loginUser, logoutUser, trackUserItem, getUserTrackedItems, deleteUserTrackedItem };
