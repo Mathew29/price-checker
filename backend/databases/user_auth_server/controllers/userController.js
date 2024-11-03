@@ -28,24 +28,33 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
-    if (result.rows.length > 0) {
-        const user = result.rows[0];
-        const isMatch = await bcrypt.compare(password, user.password_hash);
+    try{
+        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+
+        if (result.rows.length > 0) {
+            const user = result.rows[0];
+            const isMatch = await bcrypt.compare(password, user.password_hash);
 
         if (isMatch) {
-            const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
-            return res.json({ token });
+            const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {expiresIn: '1h'});
+            return res.json({ userId: user.id, token });
+            }
         }
+        res.status(401).json({ message: 'Invalid credentials' });
+
+    } catch (error){
+        console.error('Error during login:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 
-    res.status(401).json({ message: 'Invalid credentials' });
+
+
 };
 
 const logoutUser = (req,res) => {
     try{
-        // res.cookie("authToken", '', {maxAge: 0,httpOnly: true, path: '/'});
+        res.cookie("authToken", '', {maxAge: 0,httpOnly: true, path: '/'});
         return res.status(200).json({message: 'User Logged Out'})
 
     } catch(error){
@@ -54,4 +63,28 @@ const logoutUser = (req,res) => {
     }
 }
 
-module.exports = { registerUser, loginUser, logoutUser };
+const trackUserItem = async (request, response) => {
+    const { userId, productId } = request.body;
+
+    console.log(userId);
+    console.log(productId);
+
+
+    try {
+        await pool.query(
+            `
+            INSERT INTO user_item_tracking (user_id, item_id)
+            VALUES ($1, $2)
+            ON CONFLICT (user_id, item_id) DO NOTHING
+            `,
+            [userId, productId]
+        );
+
+        response.status(201).json({ message: "User item tracked successfully." });
+    } catch (error) {
+        console.error('Error in trackUserItem: ', error);
+        response.status(500).json({ message: "Failed to track user item." });
+    }
+};
+
+module.exports = { registerUser, loginUser, logoutUser, trackUserItem };

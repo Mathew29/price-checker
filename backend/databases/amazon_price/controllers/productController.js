@@ -1,13 +1,15 @@
 const pool = require('../config/db')
 const zmq = require('zeromq')
 
-const sock = new zmq.Request()
-sock.connect("tcp://localhost:5566")
 
 addProduct = async (request, response) => {
-    const {url} = request.body
+    const sock = new zmq.Request()
+    sock.connect("tcp://localhost:5566")
+
+    const {product} = request.body
+
     try{
-        await sock.send(url)
+        await sock.send(product)
 
         const [msg] = await sock.receive()
         console.log("Received message:", msg.toString())
@@ -53,7 +55,10 @@ addProduct = async (request, response) => {
 
         await pool.query('COMMIT');
 
-        response.status(201).send(`Product added with ID: ${result.rows[0].id}`);
+        response.status(201).json({
+            message: `Product added successfully.`,
+            productId: productId
+        });
 
     } catch(error) {
         await pool.query('ROLLBACK')

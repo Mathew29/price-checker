@@ -1,6 +1,7 @@
 import { MetaFunction, ActionFunctionArgs, json } from "@remix-run/node";
 import { Form, Link, redirect, useActionData } from "@remix-run/react";
 import axios from "axios";
+import { useEffect } from "react";
 
 
 
@@ -16,25 +17,37 @@ export async function action({ request }: ActionFunctionArgs) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  console.log(password);
-
-
   try{
       const response = await axios.post('http://localhost:5001/api/users/login', {
           email,
           password
       })
-      return redirect(`/homePage`)
+      const {userId, token } = response.data;
+      return json({ userId, token });
+    // return redirect(`/addItem`)
+
   }catch (error){
       if(error.response){
           return json({error: error.response.data.error}, {status: error.response.status})
       }
-      return json({error: 'Server error fe'}, {status: 500})
+      return json({error: 'Server error'}, {status: 500})
   }
 }
 
 export default function Index() {
   const actionData = useActionData();
+
+  useEffect(() => {
+    if (actionData && actionData.userId && actionData.token) {
+
+      localStorage.setItem('userId', actionData.userId);
+      localStorage.setItem('token', actionData.token);
+
+
+      window.location.href = '/addItem';
+    }
+  }, [actionData]);
+
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-16">
@@ -92,7 +105,7 @@ export default function Index() {
                     </Form>
 
                     <p className="mt-10 text-center text-sm/6 text-gray-500">
-                        <Link to="/SignUpPage" className="font-semibold text-accent-2 hover:text-accent-2">Create an Account</Link>
+                        <Link to="/SignUp" className="font-semibold text-accent-2 hover:text-accent-2">Create an Account</Link>
                     </p>
                 </div>
             </div>

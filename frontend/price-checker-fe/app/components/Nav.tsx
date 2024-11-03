@@ -4,9 +4,10 @@ import LogoutButton from "./LogOutButton"
 const Nav = () => {
     return(
         <>
-            <NavLink to="/homePage">Home</NavLink>
-            <NavLink to="/priceTrackingPage">Tracking</NavLink>
-            <LogoutButton />
+            <div className="flex items-center space-x-4">
+                <NavLink to="/priceTracking">Tracking</NavLink>
+                <LogoutButton />
+            </div>
         </>
     )
 }
