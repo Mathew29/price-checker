@@ -42,11 +42,11 @@ export default function PriceTracking() {
 
     const formatDate = (isoDate) => {
         const date = new Date(isoDate);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = String(date.getFullYear()).slice(-2);
+
+        return `${month}/${day}/${year}`;
     };
 
     const handleDelete = async () => {
@@ -95,7 +95,7 @@ export default function PriceTracking() {
                                     <ul>
                                         {product.metrics.map((metric, metricIndex) => (
                                             <li key={metricIndex} className="text-gray-300">
-                                                Price: ${metric.price}, Sale: {metric.discount}%, {formatDate(metric.record_date)}
+                                                Price: ${metric.price}, {formatDate(metric.record_date)}
                                             </li>
                                         ))}
                                     </ul>
