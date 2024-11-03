@@ -66,10 +66,6 @@ const logoutUser = (req,res) => {
 const trackUserItem = async (request, response) => {
     const { userId, productId } = request.body;
 
-    console.log(userId);
-    console.log(productId);
-
-
     try {
         await pool.query(
             `
@@ -89,7 +85,6 @@ const trackUserItem = async (request, response) => {
 
 const getUserTrackedItems = async (req, res) => {
     const { userId } = req.params;
-    console.log("UserId: ", userId);
 
     try {
         const result = await pool.query('SELECT * FROM user_item_tracking WHERE user_id = $1', [userId]);
@@ -101,7 +96,6 @@ const getUserTrackedItems = async (req, res) => {
 };
 
 const deleteUserTrackedItem = async (req, res) => {
-
     const { userId, productId } = req.params;
 
     try {

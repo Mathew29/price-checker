@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from "@remix-run/react";
 import axios from 'axios';
 
-export default function PriceTrackingPage() {
+export default function PriceTracking() {
     const [trackingData, setTrackingData] = useState([]);
     const [error, setError] = useState(null);
     const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;

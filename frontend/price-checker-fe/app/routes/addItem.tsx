@@ -26,7 +26,7 @@ export async function action({ request }: ActionFunctionArgs) {
             productId
         });
 
-        return redirect('/priceTracking');
+        return redirect('/dashBoard');
     } catch (error) {
         return json({ error: 'Failed to track the URL' }, { status: 500 });
     }
