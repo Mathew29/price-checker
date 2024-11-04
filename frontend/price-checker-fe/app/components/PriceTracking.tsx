@@ -74,7 +74,8 @@ export default function PriceTracking() {
                 <thead className="bg-gray-900">
                     <tr>
                         <th className="border-b border-gray-700 p-4 text-left text-gray-200">Product Name</th>
-                        <th className="border-b border-gray-700 p-4 text-left text-gray-200">Price History</th>
+                        <th className="border-b border-gray-700 p-4 text-left text-gray-200">Latest Price</th>
+                        <th className="border-b border-gray-700 p-4 text-left text-gray-200">Latest Date</th>
                         <th className="border-b border-gray-700 p-4 text-left text-gray-200">Actions</th>
                     </tr>
                 </thead>
@@ -92,13 +93,14 @@ export default function PriceTracking() {
                                     </a>
                                 </td>
                                 <td className="border-b border-gray-700 p-4">
-                                    <ul>
-                                        {product.metrics.map((metric, metricIndex) => (
-                                            <li key={metricIndex} className="text-gray-300">
-                                                Price: ${metric.price}, {formatDate(metric.record_date)}
-                                            </li>
-                                        ))}
-                                    </ul>
+                                    <p>
+                                        {product.metrics[0]['price']}
+                                    </p>
+                                </td>
+                                <td className="border-b border-gray-700 p-4">
+                                    <p>
+                                        {formatDate(product.metrics[0]['record_date'])}
+                                    </p>
                                 </td>
                                 <td className="border-b border-gray-700 p-4">
                                     <button
