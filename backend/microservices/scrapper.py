@@ -23,8 +23,9 @@ def main():
             if socket.poll(1000):
 
                 url = socket.recv().decode('utf-8')
+                sleep_time = random.uniform(1, 10)
 
-                time.sleep(1)
+                time.sleep(sleep_time)
                 prox = random.choice(proxies_list)
                 proxies = {
                     "http": f'http://{os.getenv("PROXY_USERNAME")}:{os.getenv("PROXY_PASSWORD")}@{prox}',
