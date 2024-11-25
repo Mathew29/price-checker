@@ -29,28 +29,12 @@ const addProduct = async (request, response) => {
             `,
             [name, image_url, asin, product]
         );
-
-        const productId = result.rows[0].id;
-
-        const existingMetric = await pool.query(
-            'SELECT * FROM dailymetrics WHERE product_id = $1 AND record_date = CURRENT_DATE',
-            [productId]
-        );
-
-        if (existingMetric.rows.length > 0) {
-
-            await pool.query(
-                'UPDATE dailymetrics SET price = $1, discount = $2 WHERE product_id = $3 AND record_date = CURRENT_DATE',
-                [price, discount, productId]
-            );
-        } else {
-
-            await pool.query(
-                'INSERT INTO dailymetrics (product_id, price, discount) VALUES ($1, $2, $3)',
-                [productId, price, discount]
-            );
+        prod = {
+            'id': result.rows[0].id,
+            'price': price,
+            'discount': discount
         }
-
+        updateDailyMetrics(prod)
 
         await pool.query('COMMIT');
 
@@ -99,8 +83,101 @@ const getProductDetails = async (request, response) => {
     }
 }
 
+const getAllProducts = async () => {
+    try {
+        console.log("Retrieving all products...");
+
+        results  = await pool.query(
+            'SELECT * FROM products'
+        );
+        return results.rows
+    } catch (error) {
+        console.error("Error fetching product data:", error);
+        response.status(500).json({ message: "Error retrieving product data" });
+    }
+}
+
+const updateProducts = async (request, response) => {
+    const sock = new zmq.Request()
+    sock.connect("tcp://localhost:5566")
+    try {
+        console.log("Starting to update items");
+        allProducts = getAllProducts();
+
+        for(const product of allProducts) {
+            await sock.send(product['url'])
+
+            const [msg] = await sock.receive()
+
+            const productData = JSON.parse(msg.toString())
+
+            const { price, discount, image: image_url, product_name: name, asin } = productData
+
+            await pool.query('BEGIN');
+
+            const result = await pool.query(
+                `
+                UPDATE products
+                SET
+                    name = $1,
+                    image_url = $2,
+                    url = $3
+                WHERE asin = $4
+                RETURNING *
+                `,
+                [name, image_url, asin, product]
+            );
+            prod = {
+                'id': result.rows[0].id,
+                'price': price,
+                'discount': discount
+            }
+            updateDailyMetrics(prod)
+            await pool.query('COMMIT');
+
+            response.status(201).json({
+                message: `Product updated successfully.`,
+                productId: productId
+            });
+        }
+
+    } catch (error) {
+        await pool.query('ROLLBACK')
+        console.error('Error in updateProducts: ', error);
+        response.status(500).send("An error occurred while updating the product")
+    }
+}
+
+const updateDailyMetrics = async (product) => {
+    try {
+        const {productId, price, discount} = product
+
+        const existingMetric = await pool.query(
+            'SELECT * FROM dailymetrics WHERE product_id = $1 AND record_date = CURRENT_DATE',
+            [productId]
+        );
+
+        if (existingMetric.rows.length > 0) {
+
+            await pool.query(
+                'UPDATE dailymetrics SET price = $1, discount = $2 WHERE product_id = $3 AND record_date = CURRENT_DATE',
+                [price, discount, productId]
+            );
+        } else {
+
+            await pool.query(
+                'INSERT INTO dailymetrics (product_id, price, discount) VALUES ($1, $2, $3)',
+                [productId, price, discount]
+            );
+        }
+    } catch (error) {
+
+    }
+}
+
 
 module.exports = {
     addProduct,
-    getProductDetails
+    getProductDetails,
+    updateProducts
 }

@@ -1,7 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const productRoutes = require('./routes/productRoutes')
+const productRoutes = require('./routes/productRoutes');
 const cors = require('cors');
+const { scheduleProductUpdate } = require('./jobs/scheduler');
 
 const app = express();
 
@@ -16,6 +17,8 @@ app.use(
     })
 );
 app.use('/api/product', productRoutes)
+
+scheduleProductUpdate()
 
 
 module.exports = app;
