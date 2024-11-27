@@ -1,6 +1,8 @@
 import { Form,redirect, useActionData } from "@remix-run/react"
 import { ActionFunctionArgs, json } from "@remix-run/node";
+import { useState } from "react";
 import axios from "axios";
+import generatePassword from "../utils/GeneratePassword";
 
 export async function action({ request }: ActionFunctionArgs) {
 
@@ -32,8 +34,18 @@ export async function action({ request }: ActionFunctionArgs) {
 
   }
 
+
+
 export default function SignUpPage() {
     const actionData = useActionData()
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+
+    const handleGeneratePassword = async () => {
+        const newPassword = await generatePassword()
+        setPassword(newPassword);
+        setConfirmPassword(newPassword);
+    }
     return(
         <div className="bg-bkg flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700">
             <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -67,12 +79,21 @@ export default function SignUpPage() {
                         <label htmlFor="password" className="block text-sm/6 font-medium text-accent-2">
                             Password
                         </label>
+                        <button
+                            type="button"
+                            onClick={handleGeneratePassword}
+                            className="text-sm font-medium text-accent-1 hover:underline"
+                            >
+                            Generate Password
+                        </button>
                         </div>
                         <div className="mt-2">
                         <input
                             id="password"
                             name="password"
                             type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             required
                             autoComplete="current-password"
                             className="block w-full rounded-md border-0 py-1.5 text-accent-2 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-1 sm:text-sm/6"
@@ -91,6 +112,8 @@ export default function SignUpPage() {
                             id="confirmPassword"
                             name="confirmPassword"
                             type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                             required
                             autoComplete="current-password"
                             className="block w-full rounded-md border-0 py-1.5 text-accent-2 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-1 sm:text-sm/6"
