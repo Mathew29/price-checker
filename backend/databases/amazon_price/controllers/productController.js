@@ -97,12 +97,13 @@ const getAllProducts = async () => {
     }
 }
 
-const updateProducts = async (request, response) => {
+const updateProducts = async () => {
     const sock = new zmq.Request()
     sock.connect("tcp://localhost:5566")
     try {
         console.log("Starting to update items");
-        allProducts = getAllProducts();
+        allProducts = await getAllProducts();
+
 
         for(const product of allProducts) {
             await sock.send(product['url'])
@@ -115,63 +116,48 @@ const updateProducts = async (request, response) => {
 
             await pool.query('BEGIN');
 
-            const result = await pool.query(
-                `
-                UPDATE products
-                SET
-                    name = $1,
-                    image_url = $2,
-                    url = $3
-                WHERE asin = $4
-                RETURNING *
-                `,
-                [name, image_url, asin, product]
-            );
             prod = {
-                'id': result.rows[0].id,
+                'id': product.id,
                 'price': price,
                 'discount': discount
             }
-            updateDailyMetrics(prod)
+            await updateDailyMetrics(prod)
             await pool.query('COMMIT');
-
-            response.status(201).json({
-                message: `Product updated successfully.`,
-                productId: productId
-            });
         }
+        console.log("items updated...");
 
     } catch (error) {
         await pool.query('ROLLBACK')
         console.error('Error in updateProducts: ', error);
-        response.status(500).send("An error occurred while updating the product")
     }
 }
 
 const updateDailyMetrics = async (product) => {
     try {
-        const {productId, price, discount} = product
+        const {id, price, discount} = product
+        console.log('PRODUCT ID: ',id);
+
 
         const existingMetric = await pool.query(
             'SELECT * FROM dailymetrics WHERE product_id = $1 AND record_date = CURRENT_DATE',
-            [productId]
+            [id]
         );
-
+        console.log('existingMetric : ',existingMetric.rows);
         if (existingMetric.rows.length > 0) {
 
             await pool.query(
                 'UPDATE dailymetrics SET price = $1, discount = $2 WHERE product_id = $3 AND record_date = CURRENT_DATE',
-                [price, discount, productId]
+                [price, discount, id]
             );
         } else {
 
             await pool.query(
                 'INSERT INTO dailymetrics (product_id, price, discount) VALUES ($1, $2, $3)',
-                [productId, price, discount]
+                [id, price, discount]
             );
         }
     } catch (error) {
-
+        console.error('Error in updateDailyMetrics:', error);
     }
 }
 
