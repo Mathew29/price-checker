@@ -19,7 +19,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 
     try {
-        const response = await axios.post('http://localhost:5001/api/users/register', {
+        await axios.post('http://localhost:5001/api/users/register', {
             password,
             email
         })
