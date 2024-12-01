@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 
-
 const registerUser = async (req, res) => {
     const { password, email } = req.body;
     try {
@@ -120,4 +119,31 @@ const deleteUserTrackedItem = async (req, res) => {
     }
 }
 
-module.exports = { registerUser, loginUser, logoutUser, trackUserItem, getUserTrackedItems, deleteUserTrackedItem };
+const setAlert = async (req, res) => {
+    const {user_id, item_id, threshold_price} = req.body
+
+    if (!user_id || !item_id || !threshold_price) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try {
+        const query = `
+            INSERT INTO alerts (user_id, item_id, threshold_price)
+            VALUES ($1, $2, $3)
+            RETURNING id;
+        `;
+        const values = [user_id, item_id,threshold_price];
+        const result = await pool.query(query, values);
+
+        res.status(201).json({ message: "Alert created", alert_id: result.rows[0].id });
+
+    }catch (error) {
+        console.error("Error creating alert:", error);
+        res.status(500).json({ error: "Failed to create alert" });
+    }
+
+}
+
+
+
+module.exports = { registerUser, loginUser, logoutUser, trackUserItem, getUserTrackedItems, deleteUserTrackedItem, setAlert};

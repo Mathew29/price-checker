@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
+const {alert} = require('./jobs/scheduler')
 
 const app = express();
 
@@ -14,5 +15,6 @@ app.use(cors({
 }));
 
 app.use('/api/users', userRoutes);
+alert()
 
 module.exports = app;
