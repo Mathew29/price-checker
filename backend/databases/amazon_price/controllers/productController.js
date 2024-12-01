@@ -29,18 +29,37 @@ const addProduct = async (request, response) => {
             `,
             [name, image_url, asin, product]
         );
-        prod = {
-            'id': result.rows[0].id,
-            'price': price,
-            'discount': discount
+
+        if (result.rows.length === 0) {
+            console.log("No rows returned from insert.");
+            return response.status(500).json({ message: "Failed to insert product" });
         }
-        updateDailyMetrics(prod)
+        const productId = result.rows[0].id;
+
+        const existingMetric = await pool.query(
+            'SELECT * FROM dailymetrics WHERE product_id = $1 AND record_date = CURRENT_DATE',
+            [productId]
+        );
+
+        if (existingMetric.rows.length > 0) {
+
+            await pool.query(
+                'UPDATE dailymetrics SET price = $1, discount = $2 WHERE product_id = $3 AND record_date = CURRENT_DATE',
+                [price, discount, productId]
+            );
+        } else {
+
+            await pool.query(
+                'INSERT INTO dailymetrics (product_id, price, discount) VALUES ($1, $2, $3)',
+                [productId, price, discount]
+            );
+        }
 
         await pool.query('COMMIT');
 
         response.status(201).json({
             message: `Product added successfully.`,
-            productId: productId
+            productId: result.rows[0].id
         });
 
     } catch(error) {
@@ -136,6 +155,8 @@ const updateDailyMetrics = async (product) => {
     try {
         const {id, price, discount} = product
         console.log('PRODUCT ID: ',id);
+        console.log('price : ',price);
+        console.log('discount : ',discount);
 
 
         const existingMetric = await pool.query(
@@ -144,13 +165,13 @@ const updateDailyMetrics = async (product) => {
         );
         console.log('existingMetric : ',existingMetric.rows);
         if (existingMetric.rows.length > 0) {
-
+            console.log('Updating existing daily metric...');
             await pool.query(
                 'UPDATE dailymetrics SET price = $1, discount = $2 WHERE product_id = $3 AND record_date = CURRENT_DATE',
                 [price, discount, id]
             );
         } else {
-
+            console.log('Inserting new daily metric...');
             await pool.query(
                 'INSERT INTO dailymetrics (product_id, price, discount) VALUES ($1, $2, $3)',
                 [id, price, discount]

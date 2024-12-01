@@ -13,10 +13,12 @@ export async function action({ request }: ActionFunctionArgs) {
     const urlPattern = new RegExp('^(https?://)?(www\\.)?amazon\\.(com|co.uk|de|fr|es|it|ca|jp)/.+$');
 
     if (!urlPattern.test(product)) {
-        return json({ error: 'Please enter a valid Amazon product URL' }, { status: 400 });
+        return console.error({ error: 'Please enter a valid Amazon product URL' }, { status: 400 });
     }
 
     try {
+        console.log('Product, ', product);
+
         const response = await axios.post('http://localhost:3000/api/product/add-product', { product });
 
         const { productId } = response.data
@@ -28,7 +30,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
         return redirect('/dashBoard');
     } catch (error) {
-        return json({ error: 'Failed to track the URL' }, { status: 500 });
+        return console.error({ error: 'Failed to track the URL' }, { status: 500 });
     }
 
 

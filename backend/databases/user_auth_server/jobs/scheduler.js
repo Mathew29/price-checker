@@ -2,7 +2,7 @@ const schedule = require('node-schedule');
 const { alertUsers } = require('../services/alert')
 
 const startAlertJob = () => {
-    const alert = schedule.scheduleJob('0 0 * * *', async () => {
+    const alert = schedule.scheduleJob('* * * * *', async () => {
         try {
             console.log('Running alert emails...');
             await alertUsers();

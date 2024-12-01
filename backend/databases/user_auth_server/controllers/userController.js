@@ -120,7 +120,9 @@ const deleteUserTrackedItem = async (req, res) => {
 }
 
 const setAlert = async (req, res) => {
-    const {user_id, item_id, threshold_price} = req.body
+    const data = req.body
+
+    const {user_id, item_id, threshold_price} = data['alertData']
 
     if (!user_id || !item_id || !threshold_price) {
         return res.status(400).json({ error: "Missing required fields" });

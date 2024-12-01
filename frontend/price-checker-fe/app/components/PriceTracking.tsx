@@ -3,6 +3,7 @@ import { Link } from "@remix-run/react";
 import axios from 'axios';
 import Modal from './Modal';
 import GraphModal from './GraphModal';
+import AlertModal from './AlertModal';
 
 export default function PriceTracking() {
     const [trackingData, setTrackingData] = useState([]);
@@ -11,6 +12,8 @@ export default function PriceTracking() {
     const [currentProductId, setCurrentProductId] = useState(null);
     const [graphModalOpen, setGraphModalOpen] = useState(false);
     const [graphModalData, setGraphModalData] = useState(null)
+    const [alertModalOpen, setAlertModalOpen] = useState(false);
+    const [alertProductName, setAlertProductName] = useState('');
     const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
 
 
@@ -98,6 +101,23 @@ export default function PriceTracking() {
         }
     }
 
+    const handleSetAlert = async (price) => {
+        try {
+           const alertData = {
+            user_id: userId,
+            item_id: currentProductId,
+            threshold_price: price
+           }
+
+            await axios.post('http://localhost:5001/api/users/set-alert', {alertData});
+            setAlertModalOpen(false)
+            setAlertProductName('')
+            setCurrentProductId(null)
+        } catch (error) {
+
+        }
+    }
+
     return (
         <div className="max-w-5xl mx-auto p-6">
             <h1 className="text-2xl font-bold mb-4 text-gray-200">Tracked Items</h1>
@@ -157,6 +177,14 @@ export default function PriceTracking() {
                                     }}>
                                         Graph
                                     </button>
+                                    <button className="px-2.5 py-1 bg-green-600 text-white rounded hover:bg-green-500" onClick={() => {
+                                        setCurrentProductId(product.id);
+                                        setAlertProductName(product.name)
+                                        setAlertModalOpen(true)
+                                    }}>
+                                        Set Alert
+                                    </button>
+
                                 </td>
                             </tr>
                         ))
@@ -176,6 +204,12 @@ export default function PriceTracking() {
                 isOpen={graphModalOpen}
                 onClose={() => setGraphModalOpen(false)}
                 data={graphModalData}
+            />
+            <AlertModal
+                isOpen={alertModalOpen}
+                onClose={() => setAlertModalOpen(false)}
+                onSetAlert={handleSetAlert}
+                productName={alertProductName}
             />
         </div>
     );

@@ -1,8 +1,6 @@
 const axios = require('axios');
 const zmq = require('zeromq')
 const pool = require('../config/db');
-const { loginUser } = require('../controllers/userController');
-
 
 const socket = new zmq.Request();
 socket.connect("tcp://localhost:5567");
