@@ -43,6 +43,7 @@ export default function SignUpPage() {
 
     const handleGeneratePassword = async () => {
         const newPassword = await generatePassword()
+        console.log('Password: ', newPassword);
         setPassword(newPassword);
         setConfirmPassword(newPassword);
     }

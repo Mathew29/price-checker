@@ -20,12 +20,12 @@ export async function action({ request }: ActionFunctionArgs) {
       password,
     });
     const { userId, token } = response.data;
-    return console.error({ userId, token });
+    return json({ userId, token });
   } catch (error) {
     if (error.response) {
-      return console.error({ error: error.response.data.error }, { status: error.response.status });
+      return json({ error: error.response.data.error }, { status: error.response.status });
     }
-    return console.error({ error: 'Server error' }, { status: 500 });
+    return json({ error: 'Server error' }, { status: 500 });
   }
 }
 
