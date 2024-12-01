@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Link } from "@remix-run/react";
 import axios from 'axios';
 import Modal from './Modal';
+import GraphModal from './GraphModal';
 
 export default function PriceTracking() {
     const [trackingData, setTrackingData] = useState([]);
     const [error, setError] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [currentProductId, setCurrentProductId] = useState(null);
+    const [graphModalOpen, setGraphModalOpen] = useState(false);
+    const [graphModalData, setGraphModalData] = useState(null)
     const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
 
 
@@ -61,6 +64,40 @@ export default function PriceTracking() {
         }
     };
 
+    const handleCSV = async () => {
+        try {
+            const res = await axios.post('http://localhost:5010/api/download-csv/download', trackingData, {
+                responseType: 'arraybuffer'
+            });
+
+            const blob = new Blob([res.data], { type: 'text/csv' })
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'tracking_data.csv';
+            link.click();
+
+
+        } catch (error) {
+            console.error('Failed to download csv:', error);
+            setError('Failed to download csv.');
+        }
+    }
+
+    const handleGraph = async (product) => {
+        try {
+            const response = await axios.post("http://localhost:5011/api/graph/", {product}, {responseType: 'blob'})
+
+            const imageUrl = URL.createObjectURL(new Blob([response.data], {type: "image/png"}));
+
+            setGraphModalData({imageUrl, productName: product.name})
+            setGraphModalOpen(true);
+
+        } catch (error) {
+            console.error('Failed to send graph data:', error);
+            setError('Failed to send graph data.');
+        }
+    }
+
     return (
         <div className="max-w-5xl mx-auto p-6">
             <h1 className="text-2xl font-bold mb-4 text-gray-200">Tracked Items</h1>
@@ -69,6 +106,9 @@ export default function PriceTracking() {
                     Add Product
                 </button>
             </Link>
+            <button className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500" onClick={handleCSV}>
+                    Download CSV
+            </button>
             {error && <p className="text-red-500">{error}</p>}
             <table className="min-w-full border border-gray-700 mt-4 bg-gray-800">
                 <thead className="bg-gray-900">
@@ -112,6 +152,11 @@ export default function PriceTracking() {
                                     >
                                         Delete
                                     </button>
+                                    <button className="px-2.5 py-1 bg-blue-600 text-white rounded hover:bg-blue-500" onClick={() => {
+                                        handleGraph(product)
+                                    }}>
+                                        Graph
+                                    </button>
                                 </td>
                             </tr>
                         ))
@@ -126,6 +171,11 @@ export default function PriceTracking() {
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
                 onConfirm={handleDelete}
+            />
+            <GraphModal
+                isOpen={graphModalOpen}
+                onClose={() => setGraphModalOpen(false)}
+                data={graphModalData}
             />
         </div>
     );
