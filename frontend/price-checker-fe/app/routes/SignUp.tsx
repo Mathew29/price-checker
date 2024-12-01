@@ -11,10 +11,10 @@ export async function action({ request }: ActionFunctionArgs) {
     const password = formData.get("password") as string
     const confirmPassword = formData.get("confirmPassword") as string
     if (!email || !email.includes('@')){
-        return json({ error: 'Please enter a valid email address' }, { status: 400 });
+        return console.error({ error: 'Please enter a valid email address' }, { status: 400 });
     }
     if (confirmPassword != password){
-        return json({error: "Passwords do not match"}, { status: 400})
+        return console.error({error: "Passwords do not match"}, { status: 400})
     }
 
 
@@ -26,9 +26,9 @@ export async function action({ request }: ActionFunctionArgs) {
         return redirect(`/`)
     } catch(error){
         if(error.response){
-            return json({error: error.response.data.error}, {status: error.response.status})
+            return console.error({error: error.response.data.error}, {status: error.response.status})
         }
-        return json({error: 'Server error fe'}, {status: 500})
+        return console.error({error: 'Server error fe'}, {status: 500})
     }
 
 
