@@ -1,9 +1,10 @@
-require('dotenv').config()
-const express = require('express');
-const cors = require('cors');
-const userRoutes = require('./routes/userRoutes');
-const { startAlertJob } = require('./jobs/scheduler')
+import dotenv from 'dotenv'
+import express from 'express'
+import cors from 'cors'
+import userRoutes from './routes/userRoutes.js'
+import { startAlertJob } from './jobs/scheduler.js'
 
+dotenv.config()
 const app = express();
 
 app.use(express.json());
@@ -17,4 +18,4 @@ app.use(cors({
 app.use('/api/users', userRoutes);
 startAlertJob()
 
-module.exports = app;
+export default app

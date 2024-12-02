@@ -1,13 +1,15 @@
-const axios = require('axios');
-const zmq = require('zeromq')
-const pool = require('../config/db');
+import axios from 'axios';
+import zmq from 'zeromq'
+import Queue from 'queue';
+import pool from '../config/db.js';
 
 const socket = new zmq.Request();
 socket.connect("tcp://localhost:5567");
+const alertQueue = new Queue({ concurrency: 1})
 
 const getAllUsers = async () => {
     try {
-        results  = await pool.query(
+        const results  = await pool.query(
             'SELECT * FROM users'
         );
         return results.rows
@@ -83,7 +85,7 @@ const combineUserDataWithProducts = async (userId) => {
     }
 }
 
-const alertUsers = async () => {
+export const alertUsers = async () => {
     const allUsers = await getAllUsers()
 
     for(const user in allUsers){
@@ -95,18 +97,18 @@ const alertUsers = async () => {
                     const name = item.name;
                     const url = item.url
                     const alertData = {email, name, url}
-                    sendAlert(alertData)
+                    alertQueue.push(() => sendAlert(alertData))
                 }
             });
         }
 
     }
-
+    alertQueue.start()
 }
 
 const sendAlert = async (data) => {
     try {
-        socket.send(JSON.stringify(data))
+        await socket.send(JSON.stringify(data))
         const buffer = await socket.receive();
         const msg = buffer.toString();
         console.log(msg);
@@ -115,8 +117,4 @@ const sendAlert = async (data) => {
         console.error('Failed to send data to microservice:', error);
     }
 
-}
-
-module.exports = {
-    alertUsers
 }

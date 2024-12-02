@@ -1,8 +1,8 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const pool = require('../config/db');
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import pool from '../config/db.js';
 
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
     const { password, email } = req.body;
     try {
         const existingUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
@@ -25,7 +25,7 @@ const registerUser = async (req, res) => {
 
 
 
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try{
@@ -51,7 +51,7 @@ const loginUser = async (req, res) => {
 
 };
 
-const logoutUser = (req,res) => {
+export const logoutUser = (req,res) => {
     try{
         res.cookie("authToken", '', {maxAge: 0,httpOnly: true, path: '/'});
         return res.status(200).json({message: 'User Logged Out'})
@@ -62,7 +62,7 @@ const logoutUser = (req,res) => {
     }
 }
 
-const trackUserItem = async (request, response) => {
+export const trackUserItem = async (request, response) => {
     const { userId, productId } = request.body;
 
     try {
@@ -82,7 +82,7 @@ const trackUserItem = async (request, response) => {
     }
 };
 
-const getUserTrackedItems = async (req, res) => {
+export const getUserTrackedItems = async (req, res) => {
     const { userId } = req.params;
 
     try {
@@ -94,7 +94,7 @@ const getUserTrackedItems = async (req, res) => {
     }
 };
 
-const deleteUserTrackedItem = async (req, res) => {
+export const deleteUserTrackedItem = async (req, res) => {
     const { userId, productId } = req.params;
 
     try {
@@ -119,7 +119,7 @@ const deleteUserTrackedItem = async (req, res) => {
     }
 }
 
-const setAlert = async (req, res) => {
+export const setAlert = async (req, res) => {
     const data = req.body
 
     const {user_id, item_id, threshold_price} = data['alertData']
@@ -145,7 +145,3 @@ const setAlert = async (req, res) => {
     }
 
 }
-
-
-
-module.exports = { registerUser, loginUser, logoutUser, trackUserItem, getUserTrackedItems, deleteUserTrackedItem, setAlert};

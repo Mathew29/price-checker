@@ -1,7 +1,7 @@
-const schedule = require('node-schedule');
-const { alertUsers } = require('../services/alert')
+import schedule from 'node-schedule'
+import {alertUsers} from '../services/alert.js'
 
-const startAlertJob = () => {
+export const startAlertJob = () => {
     const alert = schedule.scheduleJob('* * * * *', async () => {
         try {
             console.log('Running alert emails...');
@@ -13,8 +13,4 @@ const startAlertJob = () => {
         }
     })
     return alert
-}
-
-module.exports = {
-    startAlertJob
 }
